@@ -14,7 +14,246 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bids: {
+        Row: {
+          amount: number
+          bidder_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          message: string | null
+          status: Database["public"]["Enums"]["bid_status"]
+        }
+        Insert: {
+          amount: number
+          bidder_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["bid_status"]
+        }
+        Update: {
+          amount?: number
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["bid_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_bidder_id_fkey"
+            columns: ["bidder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings: {
+        Row: {
+          category: Database["public"]["Enums"]["listing_category"]
+          created_at: string
+          currency: string
+          description: string | null
+          featured: boolean
+          id: string
+          images: string[]
+          old_price: number | null
+          platform: Database["public"]["Enums"]["platform"]
+          price: number
+          rank: string | null
+          seller_id: string
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["listing_category"]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[]
+          old_price?: number | null
+          platform: Database["public"]["Enums"]["platform"]
+          price: number
+          rank?: string | null
+          seller_id: string
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["listing_category"]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[]
+          old_price?: number | null
+          platform?: Database["public"]["Enums"]["platform"]
+          price?: number
+          rank?: string | null
+          seller_id?: string
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          rating: number
+          total_sales: number
+          updated_at: string
+          username: string | null
+          verified: boolean
+        }
+        Insert: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          rating?: number
+          total_sales?: number
+          updated_at?: string
+          username?: string | null
+          verified?: boolean
+        }
+        Update: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          rating?: number
+          total_sales?: number
+          updated_at?: string
+          username?: string | null
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          buyer_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          rating: number
+          seller_id: string
+        }
+        Insert: {
+          buyer_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating: number
+          seller_id: string
+        }
+        Update: {
+          buyer_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: number
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string
+          current_players: number
+          description: string | null
+          entry_fee: number
+          id: string
+          max_players: number
+          prize_pool: number
+          start_time: string
+          status: Database["public"]["Enums"]["tournament_status"]
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          current_players?: number
+          description?: string | null
+          entry_fee?: number
+          id?: string
+          max_players?: number
+          prize_pool?: number
+          start_time: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          title: string
+        }
+        Update: {
+          created_at?: string
+          current_players?: number
+          description?: string | null
+          entry_fee?: number
+          id?: string
+          max_players?: number
+          prize_pool?: number
+          start_time?: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +262,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      bid_status: "pending" | "accepted" | "declined" | "withdrawn"
+      listing_category: "id" | "coins" | "pack" | "boost"
+      listing_status: "active" | "sold" | "paused" | "pending"
+      platform: "Mobile" | "PS5" | "PS4" | "Xbox" | "PC"
+      tournament_status: "upcoming" | "live" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +393,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      bid_status: ["pending", "accepted", "declined", "withdrawn"],
+      listing_category: ["id", "coins", "pack", "boost"],
+      listing_status: ["active", "sold", "paused", "pending"],
+      platform: ["Mobile", "PS5", "PS4", "Xbox", "PC"],
+      tournament_status: ["upcoming", "live", "completed", "cancelled"],
+    },
   },
 } as const
