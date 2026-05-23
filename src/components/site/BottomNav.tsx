@@ -1,11 +1,12 @@
+import { Link } from "@tanstack/react-router";
 import { Gavel, Home, Search, ShoppingBag, User } from "lucide-react";
 
 const items = [
-  { icon: Home, label: "Home", href: "#" },
-  { icon: Search, label: "Browse", href: "#marketplace" },
-  { icon: Gavel, label: "Sell", href: "#", primary: true },
-  { icon: ShoppingBag, label: "Orders", href: "#" },
-  { icon: User, label: "Me", href: "#" },
+  { icon: Home, label: "Home", to: "/" as const },
+  { icon: Search, label: "Browse", to: "/" as const, hash: "marketplace" },
+  { icon: Gavel, label: "Sell", to: "/sell" as const, primary: true },
+  { icon: ShoppingBag, label: "Orders", to: "/" as const },
+  { icon: User, label: "Me", to: "/auth" as const },
 ];
 
 export function BottomNav() {
@@ -14,8 +15,9 @@ export function BottomNav() {
       <ul className="grid grid-cols-5 h-16">
         {items.map((it) => (
           <li key={it.label} className="flex">
-            <a
-              href={it.href}
+            <Link
+              to={it.to}
+              hash={it.hash}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground no-tap-highlight"
             >
               {it.primary ? (
@@ -26,7 +28,7 @@ export function BottomNav() {
                 <it.icon className="w-5 h-5" />
               )}
               <span className={it.primary ? "mt-0" : ""}>{it.label}</span>
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
