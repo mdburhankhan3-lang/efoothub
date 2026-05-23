@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Bell, LogOut, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const nav = [
   { label: "Marketplace", href: "#marketplace" },
@@ -13,6 +14,8 @@ const nav = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/60">
       <div className="container mx-auto px-4 h-14 md:h-16 flex items-center gap-3">
@@ -25,7 +28,6 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Inline search (desktop) */}
         <div className="hidden md:flex flex-1 max-w-md items-center gap-2 bg-secondary/60 border border-border rounded-xl px-3 h-10">
           <Search className="w-4 h-4 text-muted-foreground" />
           <input placeholder="Search listings, sellers, coins…" className="flex-1 bg-transparent outline-none text-sm" />
@@ -47,9 +49,27 @@ export function Header() {
             <ShoppingBag className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
           </Button>
-          <Button className="hidden md:inline-flex bg-gradient-primary text-primary-foreground font-semibold shadow-primary h-9 px-4">
-            Sign in
-          </Button>
+
+          {user ? (
+            <>
+              <div className="hidden md:flex items-center gap-2 pl-2 pr-3 h-9 rounded-full bg-secondary/60 border border-border">
+                <div className="w-6 h-6 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold">
+                  {(user.email ?? "U")[0].toUpperCase()}
+                </div>
+                <span className="text-xs font-medium max-w-[120px] truncate">{user.email}</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => signOut()} title="Sign out">
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </>
+          ) : (
+            <Link to="/auth" className="hidden md:inline-flex">
+              <Button className="bg-gradient-primary text-primary-foreground font-semibold shadow-primary h-9 px-4">
+                Sign in
+              </Button>
+            </Link>
+          )}
+
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(!open)}>
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
@@ -69,7 +89,15 @@ export function Header() {
                   {n.label}
                 </a>
               ))}
-              <Button className="mt-2 h-10 bg-gradient-primary text-primary-foreground font-semibold">Sign in</Button>
+              {user ? (
+                <Button onClick={() => signOut()} className="mt-2 h-10 bg-secondary hover:bg-secondary/80 font-semibold">
+                  Sign out
+                </Button>
+              ) : (
+                <Link to="/auth" onClick={() => setOpen(false)}>
+                  <Button className="w-full mt-2 h-10 bg-gradient-primary text-primary-foreground font-semibold">Sign in</Button>
+                </Link>
+              )}
             </nav>
           </div>
         </div>

@@ -1,25 +1,63 @@
 import { Lock, ShieldCheck, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { placeBid } from "@/lib/marketplace.functions";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  listing?: { title: string; price: string } | null;
+  listing?: { id: string; title: string; price: string } | null;
 };
 
 export function BidDialog({ open, onClose, listing }: Props) {
   const [amount, setAmount] = useState("");
+  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const submitBid = useServerFn(placeBid);
 
   useEffect(() => {
     if (open) {
       setAmount("");
+      setMessage("");
       setSubmitted(false);
     }
   }, [open]);
 
   if (!open) return null;
+
+  const isMockListing = listing?.id?.startsWith("m");
+
+  const handleSubmit = async () => {
+    if (!user) {
+      onClose();
+      navigate({ to: "/auth" });
+      return;
+    }
+    if (!listing) return;
+
+    if (isMockListing) {
+      // Demo listings aren't real DB rows
+      setSubmitted(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await submitBid({ data: { listingId: listing.id, amount: Number(amount), message: message || undefined } });
+      setSubmitted(true);
+    } catch (err: any) {
+      toast.error(err.message ?? "Could not send bid");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
@@ -40,7 +78,7 @@ export function BidDialog({ open, onClose, listing }: Props) {
             </p>
 
             <label className="block text-xs font-medium text-muted-foreground mb-2">Your offer (BDT)</label>
-            <div className="flex items-center gap-2 bg-input border border-border rounded-xl px-4 h-12 mb-4">
+            <div className="flex items-center gap-2 bg-input border border-border rounded-xl px-4 h-12 mb-3">
               <span className="text-muted-foreground text-sm">৳</span>
               <input
                 value={amount}
@@ -51,17 +89,27 @@ export function BidDialog({ open, onClose, listing }: Props) {
               />
             </div>
 
+            <label className="block text-xs font-medium text-muted-foreground mb-2">Message to seller (optional)</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Hey, would you accept this offer?"
+              maxLength={500}
+              rows={2}
+              className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm outline-none mb-4 resize-none"
+            />
+
             <div className="flex items-start gap-2 text-xs text-muted-foreground mb-5 p-3 rounded-xl bg-secondary/50">
               <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
               <span>Only the seller sees your offer. Other buyers cannot view your bid amount.</span>
             </div>
 
             <Button
-              disabled={!amount}
-              onClick={() => setSubmitted(true)}
+              disabled={!amount || loading}
+              onClick={handleSubmit}
               className="w-full h-12 bg-gradient-primary text-primary-foreground font-semibold shadow-primary disabled:opacity-50"
             >
-              Submit private bid
+              {loading ? "Sending…" : user ? "Submit private bid" : "Sign in to bid"}
             </Button>
           </>
         ) : (
