@@ -32,6 +32,11 @@ export function Hero() {
             <Button className="h-12 px-6 bg-gradient-primary text-primary-foreground font-semibold shadow-primary hover:opacity-95">
               Browse <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
+            <Link to="/sell">
+              <Button variant="outline" className="h-12 px-6 font-semibold w-full sm:w-auto">
+                <Tag className="w-4 h-4" /> Sell ID
+              </Button>
+            </Link>
           </div>
 
           {/* Quick chips */}
