@@ -1,37 +1,57 @@
-import { BadgeCheck, Eye, Heart, TrendingUp } from "lucide-react";
+import { BadgeCheck, Gavel, Heart, Shield, Star } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Filters } from "./Filters";
+import { BidDialog } from "./BidDialog";
 
-const listings = [
-  { title: "Legendary Account · 110 OVR", seller: "ProTrader_BD", price: "৳12,500", oldPrice: "৳15,000", trend: "+12%", img: "linear-gradient(135deg,#0ea5e9,#6366f1)", verified: true, featured: true, views: 1240 },
-  { title: "1M eFootball Coins", seller: "CoinKing", price: "৳3,200", trend: "+5%", img: "linear-gradient(135deg,#f59e0b,#ef4444)", verified: true, views: 890 },
-  { title: "Epic Player Pack ×10", seller: "PackMaster", price: "৳2,800", oldPrice: "৳3,500", trend: "-3%", img: "linear-gradient(135deg,#a855f7,#ec4899)", verified: true, views: 560 },
-  { title: "Messi + Ronaldo Bundle", seller: "EliteGoals", price: "৳18,900", trend: "+22%", img: "linear-gradient(135deg,#10b981,#06b6d4)", verified: true, featured: true, views: 2100 },
-  { title: "Champions Squad Account", seller: "BD_Trader", price: "৳9,400", trend: "+8%", img: "linear-gradient(135deg,#3b82f6,#8b5cf6)", verified: true, views: 720 },
-  { title: "Pro Boost Service · Div 1", seller: "BoostPro", price: "৳5,500", trend: "+1%", img: "linear-gradient(135deg,#ef4444,#f59e0b)", verified: false, views: 410 },
+type Listing = {
+  title: string;
+  seller: string;
+  price: string;
+  oldPrice?: string;
+  platform: "Mobile" | "PS5" | "PS4" | "Xbox" | "PC";
+  rank: string;
+  rating: number;
+  verified: boolean;
+  featured?: boolean;
+  player: string; // gradient
+  squad: string; // gradient
+};
+
+const listings: Listing[] = [
+  { title: "Legendary Squad · 110 OVR · 25 Epic", seller: "ProTrader_BD", price: "৳12,500", oldPrice: "৳15,000", platform: "PS5", rank: "Legendary", rating: 4.9, verified: true, featured: true, player: "linear-gradient(135deg,#0ea5e9,#1e3a8a)", squad: "linear-gradient(135deg,#0b1220,#1e293b)" },
+  { title: "1M eFootball Coins · Fast Delivery", seller: "CoinKing", price: "৳3,200", platform: "Mobile", rank: "Gold", rating: 4.9, verified: true, player: "linear-gradient(135deg,#f59e0b,#b45309)", squad: "linear-gradient(135deg,#1f1305,#3b2412)" },
+  { title: "Epic Player Pack ×10 · Guaranteed", seller: "PackMaster", price: "৳2,800", oldPrice: "৳3,500", platform: "PC", rank: "Epic", rating: 4.7, verified: true, player: "linear-gradient(135deg,#a855f7,#6b21a8)", squad: "linear-gradient(135deg,#1a0b2e,#2e1065)" },
+  { title: "Messi + Ronaldo Bundle · 108 OVR", seller: "EliteGoals", price: "৳18,900", platform: "PS5", rank: "Legendary", rating: 5.0, verified: true, featured: true, player: "linear-gradient(135deg,#10b981,#065f46)", squad: "linear-gradient(135deg,#022c22,#064e3b)" },
+  { title: "Champions Squad · 106 OVR · GP Rich", seller: "BD_Trader", price: "৳9,400", platform: "Mobile", rank: "Epic", rating: 4.8, verified: true, player: "linear-gradient(135deg,#3b82f6,#1e40af)", squad: "linear-gradient(135deg,#0b1a3a,#1e3a8a)" },
+  { title: "Pro Boost Service · Division 1", seller: "BoostPro", price: "৳5,500", platform: "Xbox", rank: "Gold", rating: 4.6, verified: false, player: "linear-gradient(135deg,#ef4444,#991b1b)", squad: "linear-gradient(135deg,#1f0a0a,#450a0a)" },
 ];
 
-const filters = ["All", "Accounts", "Coins", "Packs", "Boosting", "Trending", "Under ৳5k"];
+const quickFilters = ["All", "eFootball IDs", "Coins", "Packs", "Boosting", "Trending", "Under ৳5k"];
 
 export function FeaturedListings() {
+  const [bid, setBid] = useState<Listing | null>(null);
+
   return (
-    <section className="py-16 md:py-24 bg-secondary/20">
+    <section id="featured" className="py-12 md:py-20 stadium-bg">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
           <div>
-            <p className="text-sm font-medium text-primary mb-2">HOT RIGHT NOW</p>
-            <h2 className="font-display text-3xl md:text-4xl font-bold">Featured Listings</h2>
-            <p className="text-muted-foreground mt-2">Hand-picked deals from verified sellers</p>
+            <h2 className="font-display text-2xl md:text-3xl font-bold">Featured listings</h2>
+            <p className="text-sm text-muted-foreground mt-1">Hand-picked deals from verified sellers</p>
           </div>
+          <a href="#" className="text-sm text-primary hover:underline">See all listings →</a>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-6 -mx-4 px-4">
-          {filters.map((f, i) => (
+        {/* Quick filters */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-5 -mx-4 px-4">
+          {quickFilters.map((f, i) => (
             <button
               key={f}
-              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
                 i === 0
-                  ? "bg-gradient-neon text-primary-foreground shadow-neon"
-                  : "glass text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-muted-foreground hover:text-foreground border-border"
               }`}
             >
               {f}
@@ -39,53 +59,99 @@ export function FeaturedListings() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {listings.map((l, i) => (
-            <article
-              key={l.title}
-              className="group relative bg-gradient-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-neon animate-fade-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <div className="relative aspect-[16/10] overflow-hidden" style={{ background: l.img }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                <div className="absolute top-3 left-3 flex gap-2">
-                  {l.featured && (
-                    <span className="px-2.5 py-1 rounded-md bg-accent/90 text-accent-foreground text-[10px] font-bold uppercase tracking-wider backdrop-blur">
-                      ★ Featured
-                    </span>
-                  )}
-                  <span className="px-2.5 py-1 rounded-md glass text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" /> {l.trend}
-                  </span>
-                </div>
-                <button className="absolute top-3 right-3 w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-destructive/20 transition-colors">
-                  <Heart className="w-4 h-4" />
-                </button>
-                <div className="absolute bottom-3 left-3 flex items-center gap-1 text-xs text-foreground/80">
-                  <Eye className="w-3 h-3" /> {l.views}
-                </div>
-              </div>
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+          {/* Sidebar filters */}
+          <div className="hidden lg:block">
+            <Filters />
+          </div>
 
-              <div className="p-4 md:p-5">
-                <h3 className="font-semibold text-base mb-2 line-clamp-1">{l.title}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4">
-                  <span>{l.seller}</span>
-                  {l.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary" />}
-                </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="font-display font-bold text-xl text-gradient">{l.price}</div>
-                    {l.oldPrice && <div className="text-xs text-muted-foreground line-through">{l.oldPrice}</div>}
+          {/* Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {listings.map((l, i) => (
+              <article
+                key={l.title}
+                className="group bg-card border border-border rounded-2xl overflow-hidden shadow-soft hover:border-primary/50 hover:-translate-y-0.5 transition-all animate-fade-up"
+                style={{ animationDelay: `${i * 0.04}s` }}
+              >
+                {/* Image area — Player + Squad */}
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  {/* Squad backdrop */}
+                  <div className="absolute inset-0" style={{ background: l.squad }} />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
+                  {/* Player avatar */}
+                  <div
+                    className="absolute right-3 bottom-3 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 border-white/20 shadow-soft"
+                    style={{ background: l.player }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.4),transparent_50%)]" />
+                    <div className="absolute bottom-1.5 left-2 text-[10px] font-bold text-white/90 tracking-wider">PLAYER</div>
                   </div>
-                  <Button size="sm" className="bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors">
-                    Buy now
-                  </Button>
+                  {/* Squad label */}
+                  <div className="absolute top-3 left-3 text-[10px] font-bold text-white/70 tracking-[0.2em]">SQUAD</div>
+
+                  {/* Badges */}
+                  <div className="absolute top-3 right-3 flex gap-1.5">
+                    {l.featured && (
+                      <span className="px-2 py-0.5 rounded-md bg-amber-400 text-amber-950 text-[10px] font-bold tracking-wider">★ FEATURED</span>
+                    )}
+                  </div>
+
+                  {/* Platform + Rank chips bottom-left */}
+                  <div className="absolute bottom-3 left-3 flex flex-col gap-1.5">
+                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-semibold text-white">{l.platform}</span>
+                    <span className="px-2 py-0.5 rounded-md bg-primary/90 text-primary-foreground text-[10px] font-bold tracking-wide">{l.rank}</span>
+                  </div>
+
+                  <button className="absolute top-3 right-3 sm:top-auto sm:bottom-3 sm:right-auto sm:left-auto w-8 h-8 rounded-full glass items-center justify-center hover:bg-destructive/30 transition-colors hidden">
+                    <Heart className="w-4 h-4" />
+                  </button>
                 </div>
-              </div>
-            </article>
-          ))}
+
+                {/* Body */}
+                <div className="p-4">
+                  <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1">{l.title}</h3>
+
+                  {/* Seller */}
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+                    <span className="font-medium text-foreground/90">{l.seller}</span>
+                    {l.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary" />}
+                    <span>·</span>
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span>{l.rating}</span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-end justify-between mb-3">
+                    <div>
+                      <div className="font-display font-bold text-xl">{l.price}</div>
+                      {l.oldPrice && <div className="text-xs text-muted-foreground line-through">{l.oldPrice}</div>}
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-success font-semibold">
+                      <Shield className="w-3 h-3" /> Escrow
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button className="h-10 bg-gradient-primary text-primary-foreground font-semibold shadow-primary hover:opacity-95">
+                      Buy now
+                    </Button>
+                    <Button
+                      onClick={() => setBid(l)}
+                      variant="outline"
+                      className="h-10 border-border bg-secondary/50 hover:bg-secondary font-semibold"
+                    >
+                      <Gavel className="w-4 h-4 mr-1.5" /> Place bid
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
+
+      <BidDialog open={!!bid} onClose={() => setBid(null)} listing={bid} />
     </section>
   );
 }

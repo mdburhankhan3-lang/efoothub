@@ -1,50 +1,60 @@
-import { ArrowRight, Shield, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-hero">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-
-      <div className="container mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32 relative">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-6 animate-fade-up">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">Trusted by 50,000+ eFootball players</span>
+    <section className="relative bg-gradient-hero overflow-hidden">
+      <div className="container mx-auto px-4 pt-12 pb-16 md:pt-20 md:pb-24">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-5 animate-fade-in">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs text-muted-foreground">Admin-secured escrow on every deal</span>
           </div>
 
-          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-black leading-[1.05] mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            The Premium Marketplace for
-            <span className="block text-gradient mt-2">eFootball Players</span>
+          <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-bold leading-[1.1] mb-4 animate-fade-up">
+            Buy & sell <span className="text-gradient">eFootball IDs</span> the safe way.
           </h1>
-
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Buy and sell eFootball accounts, coins, and packs with admin-secured escrow.
+          <p className="text-base md:text-lg text-muted-foreground mb-7 max-w-xl animate-fade-up" style={{ animationDelay: "0.05s" }}>
+            Browse verified seller listings, place private bids, and trade coins with full scam protection.
             Built for Bangladesh, trusted worldwide.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <Button size="lg" className="w-full sm:w-auto bg-gradient-neon hover:opacity-90 text-primary-foreground font-semibold shadow-neon h-12 px-8 group">
-              Browse Marketplace
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-8 border-border hover:bg-secondary">
-              Start Selling
+          {/* Search */}
+          <div className="flex flex-col sm:flex-row gap-2 mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <div className="flex-1 flex items-center gap-2 bg-card border border-border rounded-xl px-4 h-12 shadow-soft">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <input
+                placeholder="Search players, IDs, coins, packs..."
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+              />
+            </div>
+            <Button className="h-12 px-6 bg-gradient-primary text-primary-foreground font-semibold shadow-primary hover:opacity-95">
+              Browse <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 md:gap-8 mt-16 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.4s" }}>
+          {/* Quick chips */}
+          <div className="flex flex-wrap gap-2 animate-fade-up" style={{ animationDelay: "0.15s" }}>
+            {["Trending", "Epic cards", "GP rich", "Under ৳5k", "PS5", "Mobile"].map((c) => (
+              <button
+                key={c}
+                className="text-xs px-3 py-1.5 rounded-full bg-secondary/80 hover:bg-secondary text-foreground/90 border border-border transition-colors"
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+
+          {/* Trust strip */}
+          <div className="grid grid-cols-3 gap-3 md:gap-6 mt-10 max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
             {[
-              { icon: Users, value: "50K+", label: "Active Users" },
-              { icon: Shield, value: "100%", label: "Escrow Secured" },
-              { icon: TrendingUp, value: "৳2Cr+", label: "Volume Traded" },
+              { v: "50K+", l: "Active users" },
+              { v: "৳2Cr+", l: "Traded safely" },
+              { v: "100%", l: "Escrow protected" },
             ].map((s) => (
-              <div key={s.label} className="glass rounded-xl p-4 md:p-5">
-                <s.icon className="w-5 h-5 text-primary mx-auto mb-2" />
-                <div className="font-display font-bold text-xl md:text-2xl">{s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+              <div key={s.l}>
+                <div className="font-display font-bold text-2xl md:text-3xl">{s.v}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{s.l}</div>
               </div>
             ))}
           </div>
