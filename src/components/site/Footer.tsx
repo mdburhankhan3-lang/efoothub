@@ -13,7 +13,7 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gradient-neon flex items-center justify-center shadow-neon">
+              <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center shadow-primary">
                 <Zap className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
               </div>
               <span className="font-display font-bold text-xl">eFoot<span className="text-gradient">Hub</span></span>
@@ -36,7 +36,7 @@ export function Footer() {
           ))}
         </div>
         <div className="pt-8 border-t border-border flex flex-col md:flex-row gap-4 justify-between items-center">
-          <p className="text-xs text-muted-foreground">© 2026 eFootHub. Made with ⚡ in Dhaka, Bangladesh.</p>
+          <p className="text-xs text-muted-foreground">&copy; 2026 eFootHub. Made in Dhaka, Bangladesh.</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
             All systems operational

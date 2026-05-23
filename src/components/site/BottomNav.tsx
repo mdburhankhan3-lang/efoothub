@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Gavel, Home, Search, ShoppingBag, User } from "lucide-react";
+import { Gavel, Hop as Home, Search, ShoppingBag, User } from "lucide-react";
 
 const items = [
   { icon: Home, label: "Home", to: "/" as const },
   { icon: Search, label: "Browse", to: "/" as const, hash: "marketplace" },
   { icon: Gavel, label: "Sell", to: "/sell" as const, primary: true },
-  { icon: ShoppingBag, label: "Orders", to: "/" as const },
-  { icon: User, label: "Me", to: "/auth" as const },
+  { icon: ShoppingBag, label: "Bids", to: "/dashboard" as const },
+  { icon: User, label: "Me", to: "/dashboard" as const },
 ];
 
 export function BottomNav() {

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, LogOut, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Bell, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -55,6 +55,11 @@ export function Header() {
 
           {user ? (
             <>
+              <Link to="/dashboard" className="hidden md:inline-flex">
+                <Button variant="ghost" size="icon" title="Dashboard">
+                  <LayoutDashboard className="w-5 h-5" />
+                </Button>
+              </Link>
               <div className="hidden md:flex items-center gap-2 pl-2 pr-3 h-9 rounded-full bg-secondary/60 border border-border">
                 <div className="w-6 h-6 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold">
                   {(user.email ?? "U")[0].toUpperCase()}
@@ -93,9 +98,14 @@ export function Header() {
                 </a>
               ))}
               {user ? (
-                <Button onClick={() => signOut()} className="mt-2 h-10 bg-secondary hover:bg-secondary/80 font-semibold">
-                  Sign out
-                </Button>
+                <>
+                  <Link to="/dashboard" onClick={() => setOpen(false)} className="px-3 py-3 text-sm font-medium rounded-md hover:bg-secondary/60 flex items-center gap-2">
+                    <LayoutDashboard className="w-4 h-4" /> Dashboard
+                  </Link>
+                  <Button onClick={() => signOut()} className="mt-2 h-10 bg-secondary hover:bg-secondary/80 font-semibold">
+                    Sign out
+                  </Button>
+                </>
               ) : (
                 <Link to="/auth" onClick={() => setOpen(false)}>
                   <Button className="w-full mt-2 h-10 bg-gradient-primary text-primary-foreground font-semibold">Sign in</Button>

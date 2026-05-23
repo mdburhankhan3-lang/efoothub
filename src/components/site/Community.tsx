@@ -6,7 +6,7 @@ export function Community() {
     <section id="community" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="relative bg-gradient-card border border-border rounded-3xl overflow-hidden p-8 md:p-16">
-          <div className="absolute inset-0 grid-bg opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
 
@@ -20,7 +20,7 @@ export function Community() {
                 Trade tips, scout deals, and connect with the biggest eFootball community in Bangladesh.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Button className="bg-gradient-neon text-primary-foreground font-semibold shadow-neon">
+                <Button className="bg-gradient-primary text-primary-foreground font-semibold shadow-primary">
                   <Send className="w-4 h-4 mr-2" /> Telegram
                 </Button>
                 <Button variant="outline" className="border-border">

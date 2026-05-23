@@ -3,20 +3,75 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-// Public: list active listings (joined with seller profile)
-export const listListings = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
-    .from("listings")
-    .select(
-      "id, title, price, old_price, currency, platform, rank, category, featured, images, seller:profiles!listings_seller_id_fkey(id, username, display_name, verified, rating)"
-    )
-    .eq("status", "active")
-    .order("featured", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(24);
-  if (error) throw new Error(error.message);
-  return data ?? [];
-});
+// Public: list active listings with optional filters
+export const listListings = createServerFn({ method: "GET" })
+  .inputValidator((input) =>
+    z
+      .object({
+        category: z.enum(["id", "coins", "pack", "boost"]).optional(),
+        platform: z.enum(["Mobile", "PS5", "PS4", "Xbox", "PC"]).optional(),
+        minPrice: z.number().min(0).optional(),
+        maxPrice: z.number().min(0).optional(),
+        search: z.string().max(200).optional(),
+        sort: z.enum(["newest", "price_asc", "price_desc", "featured"]).optional(),
+      })
+      .optional()
+      .parse(input)
+  )
+  .handler(async ({ data: filters }) => {
+    let query = supabaseAdmin
+      .from("listings")
+      .select(
+        "id, title, price, old_price, currency, platform, rank, category, featured, images, seller:profiles!listings_seller_id_fkey(id, username, display_name, verified, rating)"
+      )
+      .eq("status", "active");
+
+    if (filters?.category) query = query.eq("category", filters.category);
+    if (filters?.platform) query = query.eq("platform", filters.platform);
+    if (filters?.minPrice !== undefined) query = query.gte("price", filters.minPrice);
+    if (filters?.maxPrice !== undefined) query = query.lte("price", filters.maxPrice);
+    if (filters?.search) {
+      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+    }
+
+    const sort = filters?.sort ?? "featured";
+    if (sort === "featured") {
+      query = query.order("featured", { ascending: false }).order("created_at", { ascending: false });
+    } else if (sort === "newest") {
+      query = query.order("created_at", { ascending: false });
+    } else if (sort === "price_asc") {
+      query = query.order("price", { ascending: true });
+    } else if (sort === "price_desc") {
+      query = query.order("price", { ascending: false });
+    }
+
+    const { data, error } = await query.limit(48);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// Public: get single listing by id
+export const getListing = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { data: listing, error } = await supabaseAdmin
+      .from("listings")
+      .select(
+        "id, title, description, price, old_price, currency, platform, rank, category, featured, images, status, views, created_at, seller:profiles!listings_seller_id_fkey(id, username, display_name, verified, rating, total_sales, avatar_url, country)"
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!listing) throw new Error("Listing not found");
+
+    // increment views
+    await supabaseAdmin
+      .from("listings")
+      .update({ views: (listing.views ?? 0) + 1 })
+      .eq("id", data.id);
+
+    return listing;
+  });
 
 // Public: list upcoming + live tournaments
 export const listTournaments = createServerFn({ method: "GET" }).handler(async () => {
@@ -30,7 +85,7 @@ export const listTournaments = createServerFn({ method: "GET" }).handler(async (
   return data ?? [];
 });
 
-// Authenticated: place a private bid (visible only to seller + bidder via RLS)
+// Authenticated: place a private bid
 export const placeBid = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -52,4 +107,108 @@ export const placeBid = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// Authenticated (seller): get bids for the seller's listings
+export const getSellerBids = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("bids")
+      .select(
+        "id, amount, message, status, created_at, listing_id, listings(title, price, currency, status, images), bidder:profiles!bids_bidder_id_fkey(id, username, display_name, avatar_url)"
+      )
+      .in(
+        "listing_id",
+        supabaseAdmin
+          .from("listings")
+          .select("id")
+          .eq("seller_id", userId)
+      )
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// Authenticated (seller): accept or decline a bid
+export const updateBidStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        bidId: z.string().uuid(),
+        status: z.enum(["accepted", "declined"]),
+      })
+      .parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    // Verify this bid belongs to one of the seller's listings
+    const { data: bid } = await supabase
+      .from("bids")
+      .select("id, listing_id, listings!inner(seller_id)")
+      .eq("id", data.bidId)
+      .maybeSingle();
+    if (!bid || (bid.listings as any).seller_id !== userId) {
+      throw new Error("Not authorized to update this bid");
+    }
+    const { error } = await supabase
+      .from("bids")
+      .update({ status: data.status })
+      .eq("id", data.bidId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Authenticated (seller): get own listings
+export const getSellerListings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("listings")
+      .select("id, title, price, currency, platform, status, featured, views, created_at, images, category, rank")
+      .eq("seller_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// Authenticated (seller): update listing status (pause/activate)
+export const updateListingStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        listingId: z.string().uuid(),
+        status: z.enum(["active", "paused", "sold"]),
+      })
+      .parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("listings")
+      .update({ status: data.status })
+      .eq("id", data.listingId)
+      .eq("seller_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Authenticated: get bids the user has placed
+export const getMyBids = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("bids")
+      .select(
+        "id, amount, message, status, created_at, listing_id, listings(title, price, currency, status, images, platform)"
+      )
+      .eq("bidder_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });
