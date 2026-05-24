@@ -52,7 +52,7 @@ export function BidDialog({ open, onClose, listing }: Props) {
 
     setLoading(true);
     try {
-      await submitBid({ data: { listingId: listing.id, amount: Number(amount), message: message || undefined } });
+      await submitBid({ data: { listingId: listing.id, amount: Number(amount), message: message || undefined, contact: contact || undefined } });
       setSubmitted(true);
     } catch (err: any) {
       toast.error(err.message ?? "Could not send bid");
