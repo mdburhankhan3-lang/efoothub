@@ -1,7 +1,36 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+function createPublicSupabaseClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !publishableKey) {
+    const missing = [
+      ...(!supabaseUrl ? ["SUPABASE_URL"] : []),
+      ...(!publishableKey ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
+    ];
+    throw new Error(`Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`);
+  }
+
+  return createClient<Database>(supabaseUrl, publishableKey, {
+    auth: {
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
+let publicSupabase: ReturnType<typeof createPublicSupabaseClient> | undefined;
+
+function getPublicSupabase() {
+  publicSupabase ??= createPublicSupabaseClient();
+  return publicSupabase;
+}
 
 // Public: list active listings with optional filters
 export const listListings = createServerFn({ method: "GET" })
@@ -19,7 +48,7 @@ export const listListings = createServerFn({ method: "GET" })
       .parse(input)
   )
   .handler(async ({ data: filters }) => {
-    let query = supabaseAdmin
+    let query = getPublicSupabase()
       .from("listings")
       .select(
         "id, title, price, old_price, currency, platform, rank, category, featured, images, seller:profiles!listings_seller_id_fkey(id, username, display_name, verified, rating)"
@@ -54,7 +83,7 @@ export const listListings = createServerFn({ method: "GET" })
 export const getListing = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
-    const { data: listing, error } = await supabaseAdmin
+    const { data: listing, error } = await getPublicSupabase()
       .from("listings")
       .select(
         "id, title, description, price, old_price, currency, platform, rank, category, featured, images, status, views, created_at, seller:profiles!listings_seller_id_fkey(id, username, display_name, verified, rating, total_sales, avatar_url, country)"
@@ -64,18 +93,12 @@ export const getListing = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!listing) throw new Error("Listing not found");
 
-    // increment views
-    await supabaseAdmin
-      .from("listings")
-      .update({ views: (listing.views ?? 0) + 1 })
-      .eq("id", data.id);
-
     return listing;
   });
 
 // Public: list upcoming + live tournaments
 export const listTournaments = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getPublicSupabase()
     .from("tournaments")
     .select("*")
     .in("status", ["upcoming", "live"])
