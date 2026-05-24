@@ -17,7 +17,6 @@ export function BidDialog({ open, onClose, listing }: Props) {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");
-  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
