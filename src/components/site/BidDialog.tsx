@@ -101,6 +101,17 @@ export function BidDialog({ open, onClose, listing }: Props) {
               className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm outline-none mb-4 resize-none"
             />
 
+            <label className="block text-xs font-medium text-muted-foreground mb-2">WhatsApp / Discord (so seller can reach you)</label>
+            <input
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="+8801XXXXXXXXX or username#0000"
+              maxLength={200}
+              className="w-full bg-input border border-border rounded-xl px-4 h-11 text-sm outline-none mb-4"
+            />
+
+
+
             <div className="flex items-start gap-2 text-xs text-muted-foreground mb-5 p-3 rounded-xl bg-secondary/50">
               <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
               <span>Only the seller sees your offer. Other buyers cannot view your bid amount.</span>
