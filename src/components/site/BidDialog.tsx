@@ -27,6 +27,7 @@ export function BidDialog({ open, onClose, listing }: Props) {
     if (open) {
       setAmount("");
       setMessage("");
+      setContact("");
       setSubmitted(false);
     }
   }, [open]);
