@@ -94,6 +94,7 @@ export const placeBid = createServerFn({ method: "POST" })
         listingId: z.string().uuid(),
         amount: z.number().positive().max(10_000_000),
         message: z.string().max(500).optional(),
+        contact: z.string().max(200).optional(),
       })
       .parse(input)
   )
@@ -104,6 +105,7 @@ export const placeBid = createServerFn({ method: "POST" })
       bidder_id: userId,
       amount: data.amount,
       message: data.message ?? null,
+      contact: data.contact ?? null,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
