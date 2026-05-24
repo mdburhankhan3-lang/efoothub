@@ -277,7 +277,7 @@ export const updateListing = createServerFn({ method: "POST" })
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabase
       .from("listings")
-      .update(patch)
+      .update(patch as never)
       .eq("id", listingId)
       .eq("seller_id", userId);
     if (error) throw new Error(error.message);
