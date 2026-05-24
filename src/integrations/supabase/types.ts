@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           amount: number
           bidder_id: string
+          contact: string | null
           created_at: string
           id: string
           listing_id: string
@@ -27,6 +28,7 @@ export type Database = {
         Insert: {
           amount: number
           bidder_id: string
+          contact?: string | null
           created_at?: string
           id?: string
           listing_id: string
@@ -36,6 +38,7 @@ export type Database = {
         Update: {
           amount?: number
           bidder_id?: string
+          contact?: string | null
           created_at?: string
           id?: string
           listing_id?: string

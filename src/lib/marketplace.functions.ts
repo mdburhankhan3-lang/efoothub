@@ -94,6 +94,7 @@ export const placeBid = createServerFn({ method: "POST" })
         listingId: z.string().uuid(),
         amount: z.number().positive().max(10_000_000),
         message: z.string().max(500).optional(),
+        contact: z.string().max(200).optional(),
       })
       .parse(input)
   )
@@ -104,6 +105,7 @@ export const placeBid = createServerFn({ method: "POST" })
       bidder_id: userId,
       amount: data.amount,
       message: data.message ?? null,
+      contact: data.contact ?? null,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -114,18 +116,19 @@ export const getSellerBids = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    const { data: myListings, error: lErr } = await supabase
+      .from("listings")
+      .select("id")
+      .eq("seller_id", userId);
+    if (lErr) throw new Error(lErr.message);
+    const ids = (myListings ?? []).map((l) => l.id);
+    if (ids.length === 0) return [];
     const { data, error } = await supabase
       .from("bids")
       .select(
-        "id, amount, message, status, created_at, listing_id, listings(title, price, currency, status, images), bidder:profiles!bids_bidder_id_fkey(id, username, display_name, avatar_url)"
+        "id, amount, message, contact, status, created_at, listing_id, listings(title, price, currency, status, images), bidder:profiles!bids_bidder_id_fkey(id, username, display_name, avatar_url, verified)"
       )
-      .in(
-        "listing_id",
-        supabaseAdmin
-          .from("listings")
-          .select("id")
-          .eq("seller_id", userId)
-      )
+      .in("listing_id", ids)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
