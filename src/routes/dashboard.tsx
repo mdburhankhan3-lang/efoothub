@@ -284,7 +284,13 @@ function IncomingBids() {
                   <span className="text-xs text-muted-foreground">asking {fmt(listing?.price, listing?.currency)}</span>
                 </div>
                 {b.message && (
-                  <p className="text-sm text-muted-foreground bg-secondary/40 rounded-lg p-2.5 mb-3">"{b.message}"</p>
+                  <p className="text-sm text-muted-foreground bg-secondary/40 rounded-lg p-2.5 mb-2">"{b.message}"</p>
+                )}
+                {b.contact && (
+                  <div className="text-xs mb-3 flex items-center gap-2 bg-primary/10 text-primary rounded-lg px-2.5 py-2">
+                    <span className="font-semibold">Contact:</span>
+                    <span className="font-mono break-all">{b.contact}</span>
+                  </div>
                 )}
                 {isPending && (
                   <div className="flex gap-2">
