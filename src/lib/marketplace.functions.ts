@@ -238,3 +238,48 @@ export const getMyBids = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+// Authenticated (seller): delete listing
+export const deleteListing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ listingId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("listings")
+      .delete()
+      .eq("id", data.listingId)
+      .eq("seller_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Authenticated (seller): edit listing fields
+export const updateListing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        listingId: z.string().uuid(),
+        title: z.string().min(3).max(120).optional(),
+        description: z.string().max(2000).optional(),
+        price: z.number().positive().max(10_000_000).optional(),
+        platform: z.enum(["Mobile", "PS5", "PS4", "Xbox", "PC"]).optional(),
+        rank: z.string().max(60).optional(),
+      })
+      .parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { listingId, ...fields } = data;
+    const patch: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(fields)) if (v !== undefined) patch[k] = v;
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await supabase
+      .from("listings")
+      .update(patch as never)
+      .eq("id", listingId)
+      .eq("seller_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
