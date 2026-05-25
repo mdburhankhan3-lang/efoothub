@@ -262,7 +262,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_listing_seller: { Args: { _listing_id: string }; Returns: boolean }
     }
     Enums: {
       bid_status: "pending" | "accepted" | "declined" | "withdrawn"
