@@ -62,8 +62,59 @@ export type Database = {
           },
         ]
       }
+      escrow_deals: {
+        Row: {
+          account_details: string | null
+          admin_note: string | null
+          amount: number
+          buyer_contact: string | null
+          buyer_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          seller_id: string
+          status: Database["public"]["Enums"]["escrow_status"]
+          updated_at: string
+        }
+        Insert: {
+          account_details?: string | null
+          admin_note?: string | null
+          amount: number
+          buyer_contact?: string | null
+          buyer_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          seller_id: string
+          status?: Database["public"]["Enums"]["escrow_status"]
+          updated_at?: string
+        }
+        Update: {
+          account_details?: string | null
+          admin_note?: string | null
+          amount?: number
+          buyer_contact?: string | null
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          seller_id?: string
+          status?: Database["public"]["Enums"]["escrow_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_deals_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
+          admin_status: Database["public"]["Enums"]["listing_admin_status"]
           category: Database["public"]["Enums"]["listing_category"]
           created_at: string
           currency: string
@@ -82,6 +133,7 @@ export type Database = {
           views: number
         }
         Insert: {
+          admin_status?: Database["public"]["Enums"]["listing_admin_status"]
           category: Database["public"]["Enums"]["listing_category"]
           created_at?: string
           currency?: string
@@ -100,6 +152,7 @@ export type Database = {
           views?: number
         }
         Update: {
+          admin_status?: Database["public"]["Enums"]["listing_admin_status"]
           category?: Database["public"]["Enums"]["listing_category"]
           created_at?: string
           currency?: string
@@ -126,6 +179,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -218,6 +304,35 @@ export type Database = {
           },
         ]
       }
+      tournament_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_participants_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournaments: {
         Row: {
           created_at: string
@@ -257,15 +372,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_listing_seller: { Args: { _listing_id: string }; Returns: boolean }
+      notify_user: {
+        Args: {
+          _body: string
+          _link: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       bid_status: "pending" | "accepted" | "declined" | "withdrawn"
+      escrow_status:
+        | "pending_payment"
+        | "paid"
+        | "account_submitted"
+        | "verified"
+        | "released"
+        | "refunded"
+        | "disputed"
+      listing_admin_status: "pending" | "approved" | "rejected"
       listing_category: "id" | "coins" | "pack" | "boost"
       listing_status: "active" | "sold" | "paused" | "pending"
       platform: "Mobile" | "PS5" | "PS4" | "Xbox" | "PC"
@@ -397,7 +560,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       bid_status: ["pending", "accepted", "declined", "withdrawn"],
+      escrow_status: [
+        "pending_payment",
+        "paid",
+        "account_submitted",
+        "verified",
+        "released",
+        "refunded",
+        "disputed",
+      ],
+      listing_admin_status: ["pending", "approved", "rejected"],
       listing_category: ["id", "coins", "pack", "boost"],
       listing_status: ["active", "sold", "paused", "pending"],
       platform: ["Mobile", "PS5", "PS4", "Xbox", "PC"],
