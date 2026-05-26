@@ -46,13 +46,16 @@ export function Header() {
           <Link to="/sell" className="hidden sm:inline-flex">
             <Button variant="outline" className="h-9 px-3 font-semibold">Sell ID</Button>
           </Link>
-          <Button variant="ghost" size="icon" className="hidden sm:flex">
-            <Bell className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="hidden sm:flex relative">
-            <ShoppingBag className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
-          </Button>
+          <Link to="/tournaments" className="hidden sm:inline-flex">
+            <Button variant="ghost" size="icon" title="Tournaments"><Trophy className="w-5 h-5" /></Button>
+          </Link>
+          {user ? (
+            <NotificationBell userId={user.id} />
+          ) : (
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Bell className="w-5 h-5" />
+            </Button>
+          )}
 
           {user ? (
             <>
