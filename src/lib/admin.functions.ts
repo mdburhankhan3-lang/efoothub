@@ -3,10 +3,11 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(supabase: any, userId: string) {
+  // Check role directly from profiles table
   const { data, error } = await supabase
-    .from("user_roles")
+    .from("profiles")
     .select("role")
-    .eq("user_id", userId)
+    .eq("id", userId)
     .eq("role", "admin")
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -17,8 +18,9 @@ export const isAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    // Check role directly from profiles table
     const { data } = await supabase
-      .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+      .from("profiles").select("role").eq("id", userId).eq("role", "admin").maybeSingle();
     return { isAdmin: !!data };
   });
 

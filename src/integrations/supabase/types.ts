@@ -221,6 +221,7 @@ export type Database = {
           display_name: string | null
           id: string
           rating: number
+          role: Database["public"]["Enums"]["app_role"]
           total_sales: number
           updated_at: string
           username: string | null
@@ -233,6 +234,7 @@ export type Database = {
           display_name?: string | null
           id: string
           rating?: number
+          role?: Database["public"]["Enums"]["app_role"]
           total_sales?: number
           updated_at?: string
           username?: string | null
@@ -245,6 +247,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           rating?: number
+          role?: Database["public"]["Enums"]["app_role"]
           total_sales?: number
           updated_at?: string
           username?: string | null

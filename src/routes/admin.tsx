@@ -252,7 +252,6 @@ function EscrowAdmin({ items }: { items: any[] }) {
 function UsersAdmin({ users, roles }: { users: any[]; roles: any[] }) {
   const toggleFn = useServerFn(adminToggleRole);
   const qc = useQueryClient();
-  const adminSet = new Set(roles.filter((r) => r.role === "admin").map((r) => r.user_id));
   const toggle = useMutation({
     mutationFn: (v: any) => toggleFn({ data: v }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all"] }); toast.success("Role updated"); },
@@ -261,7 +260,7 @@ function UsersAdmin({ users, roles }: { users: any[]; roles: any[] }) {
   return (
     <div className="space-y-2">
       {users.map((u) => {
-        const isAdminUser = adminSet.has(u.id);
+        const isAdminUser = u.role === "admin";
         return (
           <div key={u.id} className="bg-card border border-border rounded-lg p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center font-bold">
