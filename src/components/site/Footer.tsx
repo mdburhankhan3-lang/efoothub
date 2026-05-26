@@ -18,9 +18,19 @@ export function Footer() {
               </div>
               <span className="font-display font-bold text-xl">eFoot<span className="text-gradient">Hub</span></span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-4">
               The premium eFootball marketplace for Bangladesh and the world.
             </p>
+            <div className="flex items-center gap-2">
+              <a href="https://facebook.com/efoothub" target="_blank" rel="noreferrer" aria-label="Facebook"
+                className="w-9 h-9 rounded-lg bg-secondary/60 border border-border flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://t.me/efoothub" target="_blank" rel="noreferrer" aria-label="Telegram"
+                className="w-9 h-9 rounded-lg bg-secondary/60 border border-border flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors">
+                <Send className="w-4 h-4" />
+              </a>
+            </div>
           </div>
           {cols.map((c) => (
             <div key={c.title}>
