@@ -1,15 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, BadgeCheck, Eye, Gavel, Shield, Star, Clock, Tag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { BidDialog } from "@/components/site/BidDialog";
 import { Header } from "@/components/site/Header";
 import { BottomNav } from "@/components/site/BottomNav";
 import { getListing } from "@/lib/marketplace.functions";
+import { createEscrowDeal } from "@/lib/escrow.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/listing/$id")({
   head: () => ({
@@ -33,11 +38,25 @@ const gradients = [
 function ListingDetailPage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bidOpen, setBidOpen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
+  const [contact, setContact] = useState("");
   const fetchListing = useServerFn(getListing);
+  const buyFn = useServerFn(createEscrowDeal);
   const { data: listing, isLoading, error } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => fetchListing({ data: { id } }),
+  });
+
+  const buy = useMutation({
+    mutationFn: () => buyFn({ data: { listingId: id, buyerContact: contact.trim() } }),
+    onSuccess: () => {
+      toast.success("Escrow created — admin will confirm payment");
+      setBuyOpen(false);
+      navigate({ to: "/dashboard" });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Failed"),
   });
 
   if (isLoading) {
