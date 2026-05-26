@@ -213,6 +213,28 @@ function ListingDetailPage() {
         onClose={() => setBidOpen(false)}
         listing={{ id: listing.id, title: listing.title, price }}
       />
+
+      <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Buy with escrow protection</DialogTitle>
+            <DialogDescription>
+              You'll pay {price} via escrow. Once admin confirms your payment, the seller submits the account details to you. Share a contact below so the seller and admin can reach you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>WhatsApp / Telegram / Email</Label>
+            <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="+8801XXXXXXXXX" maxLength={200} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBuyOpen(false)}>Cancel</Button>
+            <Button className="bg-gradient-primary text-primary-foreground" disabled={contact.trim().length < 3 || buy.isPending} onClick={() => buy.mutate()}>
+              {buy.isPending ? "Creating…" : "Start escrow"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );
