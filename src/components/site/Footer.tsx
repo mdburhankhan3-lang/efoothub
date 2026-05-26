@@ -1,4 +1,4 @@
-import { Zap } from "lucide-react";
+import { Facebook, Send, Zap } from "lucide-react";
 
 const cols = [
   { title: "Marketplace", links: ["Accounts", "Coins", "Packs", "Boosting", "Trophies"] },
