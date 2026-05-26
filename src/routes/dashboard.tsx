@@ -612,3 +612,117 @@ function EmptyState({ icon: Icon, title, body, cta }: { icon: any; title: string
     </div>
   );
 }
+
+function EscrowList() {
+  const { user } = useAuth();
+  const fetchFn = useServerFn(getMyEscrowDeals);
+  const submitFn = useServerFn(submitAccountDetails);
+  const qc = useQueryClient();
+  const { data: deals = [], isLoading } = useQuery({ queryKey: ["my-escrow"], queryFn: () => fetchFn() });
+  const [submitFor, setSubmitFor] = useState<any | null>(null);
+  const [details, setDetails] = useState("");
+
+  const submit = useMutation({
+    mutationFn: () => submitFn({ data: { dealId: submitFor.id, accountDetails: details.trim() } }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-escrow"] }); toast.success("Account details submitted"); setSubmitFor(null); setDetails(""); },
+    onError: (e: any) => toast.error(e.message ?? "Failed"),
+  });
+
+  if (isLoading) {
+    return <div className="grid gap-3">{[0,1].map(i => <div key={i} className="h-24 bg-card rounded-xl animate-pulse" />)}</div>;
+  }
+  if (!deals.length) {
+    return <EmptyState icon={ShieldCheck} title="No escrow deals yet" body="Your purchases and sales protected by escrow will show up here." />;
+  }
+
+  const statusColors: Record<string, string> = {
+    pending_payment: "bg-amber-500/15 text-amber-400",
+    paid: "bg-primary/15 text-primary",
+    account_submitted: "bg-primary/15 text-primary",
+    verified: "bg-primary/15 text-primary",
+    released: "bg-success/15 text-success",
+    refunded: "bg-muted text-muted-foreground",
+    disputed: "bg-destructive/15 text-destructive",
+  };
+
+  return (
+    <>
+      <div className="space-y-3">
+        {(deals as any[]).map((d) => {
+          const isBuyer = d.buyer_id === user?.id;
+          const isSeller = d.seller_id === user?.id;
+          const listing = Array.isArray(d.listings) ? d.listings[0] : d.listings;
+          const released = d.status === "released";
+          const canSeeDetails = isBuyer && released && d.account_details;
+          const sellerCanSubmit = isSeller && d.status === "paid";
+          return (
+            <div key={d.id} className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-start gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-success/15 text-success flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm">{listing?.title ?? "Listing"}</span>
+                    <Badge className={statusColors[d.status] ?? "bg-secondary"}>{d.status.replace("_", " ")}</Badge>
+                    <Badge variant="outline" className="text-[10px]">{isBuyer ? "Buyer" : "Seller"}</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {fmt(Number(d.amount), listing?.currency)} · {getTimeAgo(new Date(d.created_at))}
+                  </div>
+                </div>
+              </div>
+
+              {d.admin_note && (
+                <div className="text-xs bg-secondary/40 rounded-lg p-2 mb-2">
+                  <span className="font-semibold">Admin note:</span> {d.admin_note}
+                </div>
+              )}
+
+              {canSeeDetails && (
+                <div className="bg-success/10 border border-success/20 rounded-lg p-3 mb-2">
+                  <div className="text-xs font-semibold text-success mb-1">Account details (released)</div>
+                  <pre className="text-xs whitespace-pre-wrap break-all">{d.account_details}</pre>
+                </div>
+              )}
+
+              {isBuyer && !released && (
+                <p className="text-xs text-muted-foreground">Account details will be revealed once admin releases the escrow.</p>
+              )}
+
+              {sellerCanSubmit && (
+                <Button size="sm" className="bg-gradient-primary text-primary-foreground" onClick={() => { setSubmitFor(d); setDetails(d.account_details ?? ""); }}>
+                  Submit account details
+                </Button>
+              )}
+              {isSeller && d.status === "account_submitted" && (
+                <p className="text-xs text-muted-foreground">Details submitted. Waiting for admin verification.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <Dialog open={!!submitFor} onOpenChange={(o) => !o && setSubmitFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Submit account details</DialogTitle>
+            <DialogDescription>
+              Provide login email, password, and any recovery info. These will be revealed to the buyer once admin releases the escrow.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Account credentials</Label>
+            <Textarea rows={6} value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Email: ...\nPassword: ...\nRecovery: ..." />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSubmitFor(null)}>Cancel</Button>
+            <Button className="bg-gradient-primary text-primary-foreground" disabled={details.trim().length < 5 || submit.isPending} onClick={() => submit.mutate()}>
+              {submit.isPending ? "Submitting…" : "Submit"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
