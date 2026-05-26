@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Bell, LayoutDashboard, LogOut, Menu, Search, Shield, ShoppingBag, Trophy, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { NotificationBell } from "@/components/site/NotificationBell";
 
 const nav = [
   { label: "Marketplace", href: "#marketplace" },
