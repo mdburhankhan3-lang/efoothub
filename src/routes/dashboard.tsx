@@ -61,6 +61,9 @@ import {
   deleteListing,
   updateListing,
 } from "@/lib/marketplace.functions";
+import { getMyEscrowDeals, submitAccountDetails } from "@/lib/escrow.functions";
+import { Label } from "@/components/ui/label";
+import { ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -168,18 +171,22 @@ function DashboardContent() {
         </div>
 
         <Tabs defaultValue="listings" className="space-y-4">
-          <TabsList className="bg-secondary/60 w-full grid grid-cols-4 h-auto p-1">
+          <TabsList className="bg-secondary/60 w-full grid grid-cols-5 h-auto p-1">
             <TabsTrigger value="listings" className="flex-col gap-0.5 py-2 text-[11px] sm:text-xs sm:flex-row sm:gap-1.5">
               <Package className="w-4 h-4" />
               <span>Listings</span>
             </TabsTrigger>
             <TabsTrigger value="active-bids" className="flex-col gap-0.5 py-2 text-[11px] sm:text-xs sm:flex-row sm:gap-1.5">
               <Gavel className="w-4 h-4" />
-              <span>Active Bids</span>
+              <span>Bids</span>
             </TabsTrigger>
             <TabsTrigger value="accepted" className="flex-col gap-0.5 py-2 text-[11px] sm:text-xs sm:flex-row sm:gap-1.5">
               <Handshake className="w-4 h-4" />
               <span>Deals</span>
+            </TabsTrigger>
+            <TabsTrigger value="escrow" className="flex-col gap-0.5 py-2 text-[11px] sm:text-xs sm:flex-row sm:gap-1.5">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Escrow</span>
             </TabsTrigger>
             <TabsTrigger value="sold" className="flex-col gap-0.5 py-2 text-[11px] sm:text-xs sm:flex-row sm:gap-1.5">
               <Trophy className="w-4 h-4" />
@@ -195,6 +202,9 @@ function DashboardContent() {
           </TabsContent>
           <TabsContent value="accepted">
             <BidsList bids={acceptedBids} isLoading={bidsQ.isLoading} variant="accepted" />
+          </TabsContent>
+          <TabsContent value="escrow">
+            <EscrowList />
           </TabsContent>
           <TabsContent value="sold">
             <SoldListings listings={soldListings} isLoading={listingsQ.isLoading} />
