@@ -178,6 +178,7 @@ function ListingDetailPage() {
                 <Button
                   className="h-12 bg-gradient-primary text-primary-foreground font-semibold shadow-primary"
                   disabled={isOwn || listing.status !== "active"}
+                  onClick={() => user ? setBuyOpen(true) : navigate({ to: "/auth" })}
                 >
                   Buy now
                 </Button>
